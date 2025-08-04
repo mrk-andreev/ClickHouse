@@ -1,10 +1,17 @@
+#include <Common/DateLUTImpl.h>
 #include <Functions/IFunction.h>
 #include <Functions/FunctionFactory.h>
 #include <Functions/FunctionHelpers.h>
 #include <DataTypes/DataTypeNullable.h>
 #include <DataTypes/DataTypesNumber.h>
 #include <DataTypes/DataTypeArray.h>
+#include <DataTypes/DataTypeDate.h>
+#include <DataTypes/DataTypeDate32.h>
+#include <DataTypes/DataTypeDateTime.h>
+#include <DataTypes/DataTypeDateTime64.h>
 #include <DataTypes/DataTypeNothing.h>
+#include <DataTypes/DataTypeNullable.h>
+#include <DataTypes/DataTypesNumber.h>
 #include <DataTypes/getLeastSupertype.h>
 #include <Columns/ColumnArray.h>
 #include <Columns/ColumnNullable.h>
@@ -76,6 +83,22 @@ private:
 
             if (i < 2 && WhichDataType(type_no_nullable).isIPv4())
                 arg_types.emplace_back(std::make_shared<DataTypeUInt32>());
+            else if (i < 2 && WhichDataType(type_no_nullable).isDate())
+                arg_types.emplace_back(std::make_shared<DataTypeDate>());
+            else if (i < 2 && WhichDataType(type_no_nullable).isDate32())
+                arg_types.emplace_back(std::make_shared<DataTypeDate32>());
+            else if (i < 2 && WhichDataType(type_no_nullable).isDateTime())
+                arg_types.emplace_back(std::make_shared<DataTypeDateTime>());
+            else if (i < 2 && WhichDataType(type_no_nullable).isDateTime64()) {
+                auto date_time_64 = static_cast<const DataTypeDateTime64 *>(arguments[i].get());
+                auto scale = date_time_64->getScale();
+                if (date_time_64->hasExplicitTimeZone()) {
+                    auto timeZone = date_time_64->getTimeZone().getTimeZone();
+                    arg_types.emplace_back(std::make_shared<DataTypeDateTime64>(scale, timeZone));
+                } else {
+                    arg_types.emplace_back(std::make_shared<DataTypeDateTime64>(scale));
+                }
+            }
             else if (isInteger(type_no_nullable))
                 arg_types.push_back(type_no_nullable);
             else
@@ -578,6 +601,7 @@ Returns an array of numbers from `start` to `end - 1` by `step`.
 The supported types are:
 - `UInt8/16/32/64`
 - `Int8/16/32/64]`
+- `Date/Date32/DateTime/DateTime64]`
 
 - All arguments `start`, `end`, `step` must be one of the above supported types. Elements of the returned array will be a super type of the arguments.
 - An exception is thrown if the function returns an array with a total length more than the number of elements specified by setting [`function_range_max_elements_in_block`](../../operations/settings/settings.md#function_range_max_elements_in_block).
