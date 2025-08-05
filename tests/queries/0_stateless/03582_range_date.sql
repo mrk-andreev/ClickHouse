@@ -2,4 +2,5 @@
 select range(toDate('2000-01-01'), toDate('2000-01-05'))
 select range(toDate32('2000-01-01'), toDate32('2000-01-05'))
 select range(toDateTime('2020-01-01 00:00:01'), toDateTime('2020-01-01 00:00:05'))
+select range(toDateTime('2020-01-01 00:00:01'), toDateTime('2020-01-01 00:00:10'), interval 2 seconds)
 select range(toDateTime('2020-01-01 00:00:01'), toDateTime('2020-04-01 00:00:01'), interval 1 month)

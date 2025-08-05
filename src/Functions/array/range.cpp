@@ -99,6 +99,10 @@ private:
                     arg_types.emplace_back(std::make_shared<DataTypeDateTime64>(scale));
                 }
             }
+            else if (i == 2 && WhichDataType(type_no_nullable).isInterval())
+            {
+                // ignore
+            }
             else if (isInteger(type_no_nullable))
                 arg_types.push_back(type_no_nullable);
             else
