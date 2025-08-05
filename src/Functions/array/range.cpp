@@ -421,7 +421,7 @@ private:
         DataTypePtr elem_type = checkAndGetDataType<DataTypeArray>(result_type.get())->getNestedType();
         WhichDataType which(elem_type);
 
-        if (!which.isNativeUInt() && !which.isNativeInt())
+        if (!which.isNativeUInt() && !which.isNativeInt() && !which.isDate() && !which.isDate32() && !which.isDateTime())
         {
             throw Exception(ErrorCodes::ILLEGAL_COLUMN,
                             "Illegal columns of arguments of function {}, the function only implemented "
@@ -491,7 +491,7 @@ private:
         bool is_step_const = isColumnConst(*column_ptrs[2]);
         if (is_start_const && is_step_const)
         {
-            if (which.isNativeUInt())
+            if (which.isNativeUInt() || which.isDate() || which.isDateTime())
             {
                 UInt64 start = assert_cast<const ColumnConst &>(*column_ptrs[0]).getUInt(0);
                 UInt64 step = assert_cast<const ColumnConst &>(*column_ptrs[2]).getUInt(0);
@@ -504,7 +504,7 @@ private:
                 {
                 }
             }
-            else if (which.isNativeInt())
+            else if (which.isNativeInt() || which.isDate32())
             {
                 Int64 start = assert_cast<const ColumnConst &>(*column_ptrs[0]).getInt(0);
                 Int64 step = assert_cast<const ColumnConst &>(*column_ptrs[2]).getInt(0);
@@ -520,7 +520,7 @@ private:
         }
         else if (is_start_const && !is_step_const)
         {
-            if (which.isNativeUInt())
+            if (which.isNativeUInt() || which.isDate() || which.isDateTime())
             {
                 UInt64 start = assert_cast<const ColumnConst &>(*column_ptrs[0]).getUInt(0);
 
@@ -531,7 +531,7 @@ private:
                 {
                 }
             }
-            else if (which.isNativeInt())
+            else if (which.isNativeInt() || which.isDate32())
             {
                 Int64 start = assert_cast<const ColumnConst &>(*column_ptrs[0]).getInt(0);
 
@@ -545,7 +545,7 @@ private:
         }
         else if (!is_start_const && is_step_const)
         {
-            if (which.isNativeUInt())
+            if (which.isNativeUInt() || which.isDate() || which.isDateTime())
             {
                 UInt64 step = assert_cast<const ColumnConst &>(*column_ptrs[2]).getUInt(0);
 
@@ -556,7 +556,7 @@ private:
                 {
                 }
             }
-            else if (which.isNativeInt())
+            else if (which.isNativeInt() || which.isDate32())
             {
                 Int64 step = assert_cast<const ColumnConst &>(*column_ptrs[2]).getInt(0);
 
